@@ -2,6 +2,8 @@
 
 namespace generator;
 
+require_once 'model/ExpressionNode.php';
+
 class ExpressionGenerator
 {
     private $config;
@@ -19,38 +21,45 @@ class ExpressionGenerator
 
         $currentLevel = 0;
         $operands = $this->getOperands($result);
+        $resultNode = new \model\ExpressionNode($operands);
+        $innerNode=$resultNode;
+        var_export($resultNode);
         while ($currentLevel < $c->maxNumOfOperands)
         {
-            $operands = $this->createBranch($operands);
+            $innerNode = $this->createBranch($innerNode);
             $currentLevel++;
         }
 
-        return $operands;
+        \printer\Printer::print_ln("---------------------------");
+        \printer\Printer::print_ln(var_export($resultNode));
+        return $resultNode;
     }
 
-    private function createBranch($operands)
+    private function createBranch($node)
     {
+        \printer\Printer::print_ln(var_export($node));
         $c = $this->config;
 
-        $size = sizeof($operands);
-        for ($i = 0;$i < $size;$i++)
+        $count = sizeof($node->getElements());
+        for ($i = 0;$i < $count;$i++)
         {
-            $current = $operands[$i];
+            $current = $node->get($i);
 
             if (is_numeric($current))
             {
                 $innerOperands = $this->getOperands($current);
-                $operands[$i] = $innerOperands;
+                $innerNode = new \model\ExpressionNode($innerOperands);
+                $node->set($i, $innerNode);
             }
 
             else if (is_array($current))
             {
-
                 $innerOperands = $this->createBranch($current);
-                $operands[$i] = $innerOperands;                
+                $innerNode = new \model\ExpressionNode($innerOperands);
+                $node->set($i, $innerNode);             
             }
         }
-        return $operands;
+        return $innerNode;
     }
 
     private function goToNextBranch($currentDepthLevel = 0)
@@ -72,10 +81,8 @@ class ExpressionGenerator
     private function getOperands($total)
     {
         $operands = [];
-        $min = $total * $this
-            ->config->minOperandRange;
-        $max = $total * $this
-            ->config->maxOperandRange;
+        $min = $total * $this->config->minOperandRange;
+        $max = $total * $this->config->maxOperandRange;
 
         $firstOperand = $this->getFirstOperand($min, $max);
         $operator = $this->getRandomOperator();

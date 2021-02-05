@@ -8,6 +8,8 @@ class Printer
         if (is_array($content))
         {
             Printer::print_tag("p", var_export($content));
+        } else if (is_object($content)) {
+            Printer::print_tag("p", json_encode($content));
         }
         else
         {
@@ -51,7 +53,7 @@ class Printer
             {
                 $innerContent = Printer::sprint_to_index_table($current);
                 $secondRowContent .= Printer::sprint_tag("td", "{$innerContent}");
-            }
+            } 
             else
             {
                 $secondRowContent .= Printer::sprint_tag("td", $current);

@@ -18,12 +18,9 @@
         
         $config = config\ExpressionConfig::level_1();
         $creator = new \generator\ExpressionGenerator($config);
-        $test = $creator->getDivisiblesOfNumber(34);
         
-        $x = $creator->create();
-        \printer\Printer::print_to_index_table($x);
-        
-        $output = sprintOperands($x);
+        $node = $creator->create();       
+        $output = sprintOperands($node);
         \printer\Printer::print_ln($output);
         
         
@@ -31,18 +28,17 @@
 //        $result = $solver->solve($output);
         
         
-        function sprintOperands ($operands) {
+        function sprintOperands ($node) {
 	$content = "";
-	for ($i=0; $i < sizeof($operands); $i++) { 
-		$current = $operands[$i];
+	for ($i=0; $i < sizeof($node->getElements()); $i++) { 
+		$current = $node->get($i);
 
-		if (is_array($current)) {
-			$content .= sprintOperands($current);
+		if (is_object($current)) {
+                    $content .= sprintOperands($current);
 		} else {
-			$content .= $current;
+                    $content .= $current;
 		}
 	}
-
 	return "({$content})";
         }
 
