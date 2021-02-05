@@ -4,6 +4,7 @@
     require_once './generator/ExpressionGenerator.php';
     require_once './printer/Printer.php';
     require_once './solver/ExpressionSolver.php';
+    require_once './formatter/ExpressionFormatter.php';
 ?>
 <!DOCTYPE html>
     
@@ -18,29 +19,23 @@
         
         $config = config\ExpressionConfig::level_1();
         $creator = new \generator\ExpressionGenerator($config);
+        $formatter = new formatter\ExpressionFormatter();
         
-        $node = $creator->create();       
-        $output = sprintOperands($node);
+        $node = $creator->create();
+        $output = $formatter->format($node);
         \printer\Printer::print_ln($output);
+
         
+        $formatter->collapse($node);
+        $formatter->collapse($node);
+        $formatter->collapse($node);
+        $format = $formatter->format($node);
+        \printer\Printer::print_ln($format);
+        
+        var_dump($format);
         
 //        $solver = new \solver\ExpressionSolver();
 //        $result = $solver->solve($output);
-        
-        
-        function sprintOperands ($node) {
-	$content = "";
-	for ($i=0; $i < sizeof($node->getElements()); $i++) { 
-		$current = $node->get($i);
-
-		if (is_object($current)) {
-                    $content .= sprintOperands($current);
-		} else {
-                    $content .= $current;
-		}
-	}
-	return "({$content})";
-        }
 
         ?>
     </body>

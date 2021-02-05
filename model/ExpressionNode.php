@@ -3,7 +3,7 @@
 namespace model;
 
 class ExpressionNode {
-    private $elements;
+    private $elements = array();
     private $visited = 0;
     
     public function __construct($elements) {
@@ -28,14 +28,52 @@ class ExpressionNode {
         return $count;
     }
 
-    public function hasChildNodes() {
-        foreach ($this->elements as $element) {
-            if (is_object($element) || is_array($element)) {
-                return true;
+    public function is_Collapsable() {
+        for ($i = 0 ; $i < sizeof($this->getElements()); $i++ ) {
+            $current = $this->get($i);
+            if (in_array($current, array("-", "*", "/") )) {
+                //\printer\Printer::print_ln("no");
+                return false;
             }
         }
         
-        return false;
+        return true;
+    }
+
+
+    public function collapseChildren () {
+        if (!$this->is_Collapsable()) {
+            return;
+        }
+        
+        $newElements = array();
+        
+         for ($i = 0 ; $i < sizeof($this->getElements()); $i++ ) {
+            $element = $this->get($i);
+            
+            if (is_object($element)) {
+                foreach ($element->getElements() as $child) {
+                    $newElements[] = $child;
+                }
+            } else {
+                $newElements[] = $element;
+            }
+        }
+        $this->elements = $newElements;
+    }
+    
+    public function hasPrimitiveChildNodes() {
+        foreach ($this->elements as $element) {
+            if (is_object($element)) {
+                foreach ($element->getElements() as $child) {
+                    if (is_object($child) || is_array($child)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        return true;
     }
             
     function getElements() {
