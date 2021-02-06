@@ -25,10 +25,10 @@
         $output = $formatter->format($node);
         \printer\Printer::print_ln($output);
 
-        
-        $formatter->collapse($node);
-        $formatter->collapse($node);
-        $formatter->collapse($node);
+        for ($index = 0; $index < $config->maxNumOfOperands; $index++) {
+            $formatter->collapse($node);
+        }
+       
         $format = $formatter->format($node);
         \printer\Printer::print_ln($format);
         

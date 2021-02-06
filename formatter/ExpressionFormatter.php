@@ -11,31 +11,42 @@ class ExpressionFormatter {
      * @param type $node :: ExpressionNode
      */
     public function format($node) {
-        $content = "";
-        for ($i=0; $i < sizeof($node->getElements()); $i++) { 
-            $before = $i - 1;
-            $after = $i + 1;
-            
-            $current = $node->get($i);
-                
-            if (is_object($current)) {
-                $content .= ExpressionFormatter::format($current);
-            } else {
-                $current = $node->get($i);
-                
-                // Add parentheses in front of negative elements
-                if ($before >= 0) {
-                    $beforeEleme = $node->get($before);
-                    if ($current <= 0 && ($beforeEleme === "-" || $beforeEleme === "+" )) {
-                        $current = "(" . $current . ")";
-                    }
-                }
-                
-                $content .= $current;
-            }
-        }
-        return "({$content})";
+        $output = $this->formatArray($node);
+        
+        $output = substr($output, 1, strlen($output) - 1);
+        
+        return $output;
     }
+    
+    public function formatArray($node) {
+        $content = "";
+        
+            for ($i=0; $i < sizeof($node->getElements()); $i++) { 
+                $before = $i - 1;
+                $after = $i + 1;
+
+                $current = $node->get($i);
+
+                if (is_object($current)) {
+                    $content .= $this->formatArray($current);
+                } else {
+                    $current = $node->get($i);
+
+                    // Add parentheses in front of negative elements
+                    if ($before >= 0) {
+                        $beforeEleme = $node->get($before);
+                        if ($current <= 0 && ($beforeEleme === "-" || $beforeEleme === "+" )) {
+                            $current = "(" . $current . ")";
+                        }
+                    }
+
+                    $content .= $current;
+                }
+            }
+            return "({$content})";    
+    }
+    
+    
     
     /**
      * Prints expression as a basic formatted string
@@ -48,7 +59,7 @@ class ExpressionFormatter {
             $current = $node->get($i);
 
             if (is_object($current)) {
-                $content .= ExpressionFormatter::formatBasic($current);
+                $content .= $this->formatBasic($current);
             } else {
                 $content .= $current;
             }

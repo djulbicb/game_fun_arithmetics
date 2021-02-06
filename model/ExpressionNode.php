@@ -21,13 +21,11 @@ class ExpressionNode {
     public function set($index, $value) {
         $this->elements[$index] = $value;
     }
-
-
-    public function size() {
-        $count = sizeof($this->elements);
-        return $count;
+  
+    function setElements($elements) {
+        $this->elements = $elements;
     }
-
+    
     public function is_Collapsable() {
         for ($i = 0 ; $i < sizeof($this->getElements()); $i++ ) {
             $current = $this->get($i);
@@ -50,16 +48,17 @@ class ExpressionNode {
         
          for ($i = 0 ; $i < sizeof($this->getElements()); $i++ ) {
             $element = $this->get($i);
-            
+
             if (is_object($element)) {
                 foreach ($element->getElements() as $child) {
                     $newElements[] = $child;
                 }
             } else {
+                \printer\Printer::print_ln($element);
                 $newElements[] = $element;
             }
         }
-        $this->elements = $newElements;
+        return $newElements;
     }
     
     public function hasPrimitiveChildNodes() {
@@ -82,10 +81,6 @@ class ExpressionNode {
 
     function getVisited() {
         return $this->visited;
-    }
-
-    function setElements($elements) {
-        $this->elements = $elements;
     }
 
     function setVisited($visited) {
