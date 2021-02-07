@@ -11,9 +11,16 @@
     <head>
         <meta charset="UTF-8">
         <title></title>
+        
+        <style type='text/css'>
+* {
+   font-family:courier, courier new, serif; }
+</style>
+
     </head>
     <body>
         <?php
+        
         echo 'sss';
         echo 'sssss';
         
@@ -23,10 +30,14 @@
         
         $node = $creator->create();
         $output = $formatter->format($node);
-        \printer\Printer::print_ln($output);
+        \printer\Printer::print_ln("$output");
 
-        for ($index = 0; $index < $config->maxNumOfOperands; $index++) {
-            $formatter->collapse($node);
+        //  $config->maxNumOfOperands
+        for ($index = 0; $index < $config->maxNumOfOperands * 2; $index++) {
+            $node = $formatter->collapse($node);
+            
+            $output = $formatter->format($node);
+            \printer\Printer::print_ln("$output");
         }
        
         $format = $formatter->format($node);

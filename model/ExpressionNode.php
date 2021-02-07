@@ -14,7 +14,14 @@ class ExpressionNode {
         }
     }
     
+//    public function __toString() {
+//        return "" . var_export($this->getElements());
+//    }
+//    
     public function get($index) {
+        if ($index < 0 || $index > count($this->elements) - 1) {
+            return null;
+        }
         return $this->elements[$index];
     }
     
@@ -27,7 +34,11 @@ class ExpressionNode {
     }
     
     public function is_Collapsable() {
-        for ($i = 0 ; $i < sizeof($this->getElements()); $i++ ) {
+        if (count($this->getElements()) == 1) {
+            return true;
+        }
+        
+        for ($i = 0 ; $i < count($this->getElements()); $i++ ) {
             $current = $this->get($i);
             if (in_array($current, array("-", "*", "/") )) {
                 //\printer\Printer::print_ln("no");
@@ -41,12 +52,11 @@ class ExpressionNode {
 
     public function collapseChildren () {
         if (!$this->is_Collapsable()) {
-            return;
+            return $this->getElements();
         }
         
         $newElements = array();
-        
-         for ($i = 0 ; $i < sizeof($this->getElements()); $i++ ) {
+        for ($i = 0 ; $i < sizeof($this->getElements()); $i++ ) {
             $element = $this->get($i);
 
             if (is_object($element)) {
@@ -54,10 +64,9 @@ class ExpressionNode {
                     $newElements[] = $child;
                 }
             } else {
-                \printer\Printer::print_ln($element);
                 $newElements[] = $element;
             }
-        }
+        }        
         return $newElements;
     }
     

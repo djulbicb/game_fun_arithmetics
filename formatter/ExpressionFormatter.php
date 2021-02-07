@@ -13,7 +13,7 @@ class ExpressionFormatter {
     public function format($node) {
         $output = $this->formatArray($node);
         
-        $output = substr($output, 1, strlen($output) - 1);
+        $output = substr($output, 1, strlen($output) - 2);
         
         return $output;
     }
@@ -67,25 +67,95 @@ class ExpressionFormatter {
         return "({$content})";
     }
     
-    public function collapse ($node) {
-        for ($i=0; $i < sizeof($node->getElements()); $i++) { 
-            $current = $node->get($i);
-
-            if (is_object($current)) {
-                if ($current->hasPrimitiveChildNodes()) {
-//                    \printer\Printer::print_ln("+-----");
-//                    var_dump($current);
-//                    \printer\Printer::print_ln("+-----");
-                    echo '<br>collapse</br>';
-                        $current->collapseChildren();
-                    
-                } else {
-                    return $this->collapse($current);
-                }
-            }
-        } 
+    public function collapse (&$node) {
+        $collapsed = array();
         
-        return $node;
-       
+        for ($index = 0; $index < count($node->getElements()); $index++) {                  
+            $prev = $node->get($index - 1);
+            $current = $node->get($index);
+            $next = $node->get($index + 1);
+            
+            if (is_a($current , '\model\ExpressionNode')) {  
+                if (count($current->getElements()) == 1) {
+                    for ($y = 0; $y < count($childNodes->getElements()); $y++) {
+                        $collapsed[] = $childNodes[$y];
+                    }
+                }
+                else if ($prev === "-" ) {
+                    $collapsed[] = $current;
+                } else {
+                    $childNodes = $current->collapseChildren();
+                    $skipNextChild = false;
+                    
+                    if (count($childNodes) == 1) {
+                        for ($y = 0; $y < count($childNodes->getElements()); $y++) {
+                            $collapsed[] = $childNodes[$y];
+                        }
+                        continue;
+                    }
+                    
+                    for ($x = 0; $x < count($childNodes); $x++) {
+                        $child = $childNodes[$x];
+                        $prevChild = $this->getOrNull($childNodes, $x - 1);
+                        $nextChild = $this->getOrNull($childNodes, $x + 1);
+                        
+                        if (is_numeric($child ) && $child  == 0 &&  $this->isMinusPlusNull($prevChild) && $this->isMinusPlusNull($nextChild) ) {
+                            if ($skipNextChild) {
+                                $$skipNextChild= false;
+                                continue;
+                            }
+                            if ($this->isMinusPlusNull($prevChild)) {
+                                array_pop($collapsed);
+                                $skipNext = true;
+                            }
+                            // skip adding 0
+                        } else {
+                            $collapsed[] = $child;
+                        } 
+                        
+                       // $collapsed[] = $child;
+                    }
+                }
+            } else {
+                
+//                if ($current == 0 &&  $this->isMinusPlusNull($prev) && $this->isMinusPlusNull($next) ) {
+//                    if ($this->isMinusPlus($prev)) {
+//                        array_pop($collapsed);
+//                    }
+//                     // skip adding 0
+//                } else {
+//                    $collapsed[] = $current;   
+//                }
+                
+                 $collapsed[] = $current;   
+            }
+        }
+          
+        return new \model\ExpressionNode($collapsed);
+    }
+    
+    public function getOrNull($array, $incex) {
+        if ($incex < 0 || $incex > count($array) - 1) {
+            return null;
+        } 
+        return $array[$incex];
+    }
+    
+    public function isMinusPlus($element) {
+        if (in_array($element, array("+", "-"))) {
+            return true;
+        } else {
+            return false;
+        }      
+    }
+    
+    public function isMinusPlusNull($element) {
+        if (in_array($element, array("+", "-", null))) {
+            return true;
+        } else {
+            return false;
+        }      
     }
 }
+
+

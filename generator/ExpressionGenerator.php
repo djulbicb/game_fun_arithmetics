@@ -23,21 +23,18 @@ class ExpressionGenerator
         $operands = $this->getOperands($result);
         $resultNode = new \model\ExpressionNode($operands);
         $innerNode=$resultNode;
-        var_export($resultNode);
+
         while ($currentLevel < $c->maxNumOfOperands)
         {
             $innerNode = $this->createBranch($innerNode);
             $currentLevel++;
         }
 
-        \printer\Printer::print_ln("---------------------------");
-        \printer\Printer::print_ln(var_export($resultNode));
         return $resultNode;
     }
 
     private function createBranch($node)
     {
-        \printer\Printer::print_ln(var_export($node));
         $c = $this->config;
 
         $count = sizeof($node->getElements());
