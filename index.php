@@ -33,7 +33,7 @@
         \printer\Printer::print_ln("$output");
 
         //  $config->maxNumOfOperands
-        for ($index = 0; $index < $config->maxNumOfOperands * 2; $index++) {
+        for ($index = 0; $index < $config->maxNumOfOperands * 3; $index++) {
             $node = $formatter->collapse($node);
             
             $output = $formatter->format($node);

@@ -16,8 +16,8 @@ class ExpressionConfig {
 	public $maxOperandRange;
 
 	public static function level_1() {
-		$config = new ExpressionConfig();
-		$config->availableOperators = ["+", "-"]; //"*", "/"
+		$config = new ExpressionConfig(); 
+		$config->availableOperators = ["+", "-"];  // , "+", "-", "*", "/"
 		$config->minTotal = 0;
 		$config->maxTotal = 50;
 		$config->maxNumOfOperands = 4;
