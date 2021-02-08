@@ -33,7 +33,7 @@
         \printer\Printer::print_ln("$output");
 
         //  $config->maxNumOfOperands
-        for ($index = 0; $index < $config->maxNumOfOperands * 3; $index++) {
+        for ($index = 0; $index < $config->maxNumOfOperands * 4; $index++) {
             $node = $formatter->collapse($node);
             
             $output = $formatter->format($node);
@@ -47,7 +47,7 @@
         
 //        $solver = new \solver\ExpressionSolver();
 //        $result = $solver->solve($output);
-
+//        \printer\Printer::print_ln($result );
         ?>
     </body>
 </html>

@@ -69,10 +69,10 @@ class ExpressionFormatter {
     public function collapse(&$node) {
         $collapsed = array();
         $skipNextChild = false;
-        $found = false;
-        $break = false;
+       
+        $skipAllNext = false;
         
-        for ($index = 0; $index < count($node->getElements()); $index++) {   
+        for ($index = 0; $index < count($node->getElements()); $index++) {            
             if ($skipNextChild) {
                 $skipNextChild = false;
                 continue;
@@ -82,12 +82,18 @@ class ExpressionFormatter {
             $current = $node->get($index);
             $next = $node->get($index + 1);
             
-            if (!$break && is_a($current, '\model\ExpressionNode')) {
+            if ($skipAllNext) {
+                \printer\Printer::print_ln("skipping");
+                $collapsed[] = $current;
+                continue;
+            }
+            
+            if (is_a($current, '\model\ExpressionNode')) {
                 if (count($current->getElements()) == 0) {
                     // element is empty so remove expression sign in front
                     if ($this->isMinusPlus($prev)){
                         array_pop($collapsed);    
-
+                        $skipAllNext=true;
                     }
                     
                 } else if (count($current->getElements()) == 1) {
@@ -117,29 +123,54 @@ class ExpressionFormatter {
                         $collapsed[] = $child;
                     }
                 }
-            } 
-            else {
-                if (is_object($current)) {
+            } else if (is_object($current)) {
                     $collapsed[] = $current;
-                }
-                else if ( $current == 0 && $this->isMinusPlus($prev) && $this->isMinusPlus($next)) {
+            }
+            
+            else {
+                
+//1-() // fix these
+//1-()
+                
+                if ( $current == 0 && $this->isMinusPlus($prev) && $this->isMinusPlus($next)) {
                     if ($this->isMinusPlus($prev)) {
                         array_pop($collapsed);
-                        $break = true;
+                        $skipAllNext=true;
                     }
                 } 
+                else if (is_null($prev) && $current == 0 && $this->isPlus($next)) {
+                    $skipNextChild = true;
+                    $skipAllNext=true;
+                    // 17-7-(-1-(-9)+(-3)+(-1)-(+(-1)))
+                }
+                else if (is_null($prev) && $current == 0 && $this->isMinus($next)) {
+                
+                    $skipAllNext=true;
+                    // 17-7-(-1-(-9)+(-3)+(-1)-(+(-1)))
+                }
                 
                 else if ($current == 0 && is_null($next)) {
                     // get rid of 0 at end
                     // 12-4+(-2)-(-7)+(0)+(-1)+(0)+(-1)+(0)+(0)
                     if ($this->isMinusPlus($prev)) {
                         array_pop($collapsed);
-                        $break = true;
+                        $skipAllNext=true;
                     }
-                    
-                } else if (is_null($prev) && $this->isPlus($current) && is_object($next)) {
-                    // 17-7-(-1-(-9)+(-3)+(-1)-(+(-1)))
-                }               
+                }
+                
+                else if ($current == 0 && is_null($next) && $this->isMinusPlus($prev)) {
+                                           array_pop($collapsed);
+                    $skipNextChild = true;
+                    $skipAllNext=true;
+                }
+//                    
+//                } else if (is_null($prev) && $this->isPlus($current) && is_object($next)) {
+//                    // 17-7-(-1-(-9)+(-3)+(-1)-(+(-1)))
+//                } else if ($current == 0 && is_null($prev) + $this->isMinusPlus($next)) {
+//                    if ($this->isPlus($next)) {
+//                        // skip -(0+2))' 
+//                    }
+//                }              
 
                 else {
                     $collapsed[] = $current;
@@ -159,7 +190,14 @@ class ExpressionFormatter {
         return $array[$incex];
     }
 
-  
+      public function isMinus($element) {
+        if (in_array($element, array("-"))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     public function isPlus($element) {
         if (in_array($element, array("+"))) {
             return true;
