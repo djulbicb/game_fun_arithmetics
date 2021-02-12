@@ -19,10 +19,7 @@ class ExpressionNode {
 //    }
 //    
     public function get($index) {
-        if ($index < 0 || $index > count($this->elements) - 1) {
-            return null;
-        }
-        return $this->elements[$index];
+        return \util\Util::array_get($this->elements, $index);
     }
     
     public function set($index, $value) {

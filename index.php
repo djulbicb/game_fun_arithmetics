@@ -20,10 +20,7 @@
     </head>
     <body>
         <?php
-        
-        echo 'sss';
-        echo 'sssss';
-        
+
         $config = config\ExpressionConfig::level_1();
         $creator = new \generator\ExpressionGenerator($config);
         $formatter = new formatter\ExpressionFormatter();
@@ -44,10 +41,17 @@
         \printer\Printer::print_ln($format);
         
         var_dump($format);
+  
         
-//        $solver = new \solver\ExpressionSolver();
-//        $result = $solver->solve($output);
-//        \printer\Printer::print_ln($result );
+        
+//          $output = "-10/12-4-(-9+2-(-5+(0)+(1+(0))-(0-1)))";
+//          $expression = "(20 + 30 * 5 / 4 + 10 * 5 / 2 - 4 + 3 - 2 /10 * 3 + 5 - 10 * 1 / 5 + 10 + 44 + 2 - 5 - 10 * -10  / -5 * -1)";
+//          
+//          $output = "5*-10+-10/12-4-(-9+2-(-10/12-5+0+1--1*-1))";
+//          printer\Printer::print_to_index_table($output);
+        $solver = new \solver\ExpressionSolver();
+        $result = $solver->solve($output);
+        \printer\Printer::print_ln($result );
         ?>
     </body>
 </html>

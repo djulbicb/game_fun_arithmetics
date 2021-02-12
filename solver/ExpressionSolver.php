@@ -4,6 +4,7 @@ namespace solver;
 
 define('__ROOT__', dirname(dirname(__FILE__))); 
 require_once __ROOT__ . '/model/ExpressionSection.php';
+require_once __ROOT__ . '/util/Util.php';
 
 class ExpressionSolver
 {
@@ -22,14 +23,16 @@ class ExpressionSolver
 
             \printer\Printer::print_ln($expression);
 
+            
+             $expressionSection =  $this->getInner($expression, "(", ")", 0);
+
+           
             while(strpos($expression, "(") !== false) {
                     \printer\Printer::print_ln("------------------");
                     $expressionSection =  $this->getInner($expression, "(", ")", 0);
                     $prepared = $this->prepare_for_calculate($expressionSection->section);
 
                     \printer\Printer::print_to_index_table($prepared);
-
-                    \printer\Printer::print_ln($prepared);
                     $total = $this->calculate_numbers($prepared);	
 
                     \printer\Printer::print_ln($total);
@@ -39,52 +42,60 @@ class ExpressionSolver
                     \printer\Printer::print_ln($total);
             }
 
-
-            $lastCalc = prepare_for_calculate($expression);
-            $totalFinal = calculate_numbers($lastCalc);
+            $lastCalc = $this->prepare_for_calculate($expression);
+            $totalFinal = $this->calculate_numbers($lastCalc);
             \printer\Printer::print_ln($totalFinal);
 
+            return $totalFinal;
 	}
         
         
+        /**
+         * Transform string expression into array of elements
+         * @param type $calc
+         * @return type
+         */
         function prepare_for_calculate($calc) {
 	$calc = str_replace(")", "", $calc);
 	$calc = str_replace("(", "", $calc);
 
 	// echo $calc;
 	$segments = $this->explode_string($calc, true, "+", "-", "/", "*");
-	// print_to_index_table($segments);
 
 	// convert minus into negative segment
 	// example [-, 10, *, 7, -, 11] into [-10, *, 7, +, -11]
 	$oper = ["*", "/", "%"];
-	while (in_array("-", $segments)) {
-		$foundMinusIndex = array_search("-", $segments, true);
-
-		$previous = $segments[$foundMinusIndex - 1];
-		$next = floatval($segments[$foundMinusIndex + 1]);
-		$nextValue = $next * -1;
-
-		\printer\Printer::print_ln("$previous $foundMinusIndex $nextValue");
-
-		$insertElements = array();
-
-		if ($foundMinusIndex > 0) {
-			if (!in_array($previous, $oper)) {
-				$insertElements[] = "+";
-			}
-			$insertElements[] = $nextValue;
-		} else {
-			$insertElements[] = $nextValue;
-		}
-
-		array_splice($segments, $foundMinusIndex, 2, $insertElements);
-	}
-
-
-	\printer\Printer::print_ln("sss");
-	\printer\Printer::print_to_index_table($segments);
-	return $segments;
+        $allOper = ["+", "-", "*", "/", "%"];
+        
+        $insertElements = array();
+        $skipNext = false;
+        for ($index = 0; $index < count($segments); $index++) {
+            if ($skipNext) {
+                $skipNext = false;
+                continue;
+            }
+            $current= \util\Util::array_get($segments, $index);
+            $previous = \util\Util::array_get($segments, $index - 1);
+            $next = \util\Util::array_get($segments, $index + 1);
+            
+            // number is on begining of expression
+            if ($current == "-" && is_null($previous) && is_numeric($next)) {
+                $insertElements[] = $next * -1;
+                $skipNext = true;
+            
+            } else if ($current == "-" && in_array($next, $allOper)) { 
+                $insertElements[] = $current;
+            } else if ($current == "-" && is_numeric($next)) { 
+                if (is_numeric($previous)) {
+                    $insertElements[] = "+";
+                }
+                $insertElements[] = $next * -1;
+                $skipNext = true;
+            } else {
+                $insertElements[] = $current;
+            }
+        }
+	return $insertElements;
 }
 
 
@@ -97,7 +108,7 @@ class ExpressionSolver
 // 	Supports arithmetic functions: / * % + - 
 function calculate_numbers($segments) {
 	$operatorPriority = [ ["*", "/", "%"], ["+", "-"]];
-
+            
 	for ($j=0; $j < count($operatorPriority); $j++) { 
 		$operatorPriorityLevel = $operatorPriority[$j];
 
@@ -141,11 +152,11 @@ function calculate_numbers($segments) {
 				// reset index to check again for other occurences of that arithmetic operator
 				$i--;
 
-				\printer\Printer::print_to_index_table($segments);
-			
+				\printer\Printer::print_to_index_table($segments);	
 		}
 	}
 }
+
 
 return $segments[0];
 
