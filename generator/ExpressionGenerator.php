@@ -16,88 +16,70 @@ class ExpressionGenerator
     public function create()
     {
         $c = $this->config;
-        $result = rand($c->minTotal, $c->maxTotal);
+        $result = $this->generateResult();
         \printer\Printer::print_ln($result);
 
-        $currentLevel = 0;
-        $operands = $this->getOperands($result);
+        $operands = $this->generateOperands($result);
         $resultNode = new \model\ExpressionNode($operands);
+        
         $innerNode=$resultNode;
-
-        while ($currentLevel < $c->maxNumOfOperands)
+        $currentGenerateDepth = 0;
+        while ($currentGenerateDepth < $c->maxGenerateDepth)
         {
-            $innerNode = $this->createBranch($innerNode);
-            $currentLevel++;
+         
+            
+            \printer\Printer::print_ln(">>>> Pocinje grana");
+            $currentGenerateDepth++;
+            $innerNode = $this->generateExpressionDepth($innerNode);
+            \printer\Printer::print_ln(">>>> $currentGenerateDepth"); 
+            \printer\Printer::print_ln(">>>> Zavrsava grana");   
         }
-
+       
         return $resultNode;
     }
-
-    private function createBranch($node)
-    {
+    
+    /**
+     * Generate final number. Will prefer numbers that are more divisible
+     * Example: 12 is more divisible than 3. 
+     *          12 can be divided with 1, 2, 3, 4, 6, 12. 
+     *          3 can be divided with 1 and 3
+     * @return  nunber - this number will be final result\Printer::print_ln(">>>> $currentGenerateDepth"); of expression
+     */
+    public function generateResult() {
         $c = $this->config;
-
-        $count = sizeof($node->getElements());
-        for ($i = 0;$i < $count;$i++)
-        {
-            $current = $node->get($i);
-
-            if (is_numeric($current))
-            {
-                $innerOperands = $this->getOperands($current);
-                $innerNode = new \model\ExpressionNode($innerOperands);
-                $node->set($i, $innerNode);
-            }
-
-            else if (is_array($current))
-            {
-                $innerOperands = $this->createBranch($current);
-                $innerNode = new \model\ExpressionNode($innerOperands);
-                $node->set($i, $innerNode);             
-            }
-        }
-        return $innerNode;
-    }
-
-    private function goToNextBranch($currentDepthLevel = 0)
-    {
-        $c = $this->config;
-        if ($currentDepthLevel < $c->maxNumOfOperands)
-        {
-            return true;
-        }
-        return false; //$this->rand_bool();
+        $min = $c->minTotal;
+        $max = $c->maxTotal;
         
+        $attempt = 0;
+        $lastResult = 0;
+        $lastResultDivisibleCount = 0;
+        
+        while ($attempt < $c->randomMaxGenerationAttemps) {
+            $attempt++;
+            
+            $result = \random\Random::getRandInt($min, $max, 0.5);
+            $resultDivisibleCount = \util\Util::getDivisiblesOfNumber($lastResult);
+            
+            if ($resultDivisibleCount >= $lastResultDivisibleCount) {
+                $lastResultDivisibleCount = $resultDivisibleCount;
+                $lastResult = $result;
+            }
+        }
+        
+        return $lastResult;
     }
-
-    private function rand_bool()
+    
+        public function getRandomOperator()
     {
-        return (bool)random_int(0, 1);
+        return $this->config->availableOperators[rand(0, sizeof($this->config->availableOperators) - 1) ];
     }
-
-    private function getOperands($total)
-    {
-        $operands = [];
-        $min = $total * $this->config->minOperandRange;
-        $max = $total * $this->config->maxOperandRange;
-
-        $firstOperand = $this->getFirstOperand($min, $max);
-        $operator = $this->getRandomOperator();
-        $secondOperand = $this->getSecondOperand($firstOperand, $operator, $total);
-
-        $operands[] = $firstOperand;
-        $operands[] = $operator;
-        $operands[] = $secondOperand;
-
-        return $operands;
-    }
-
-    private function getFirstOperand($min, $max)
+    
+    private function generateFirstOperand($min, $max)
     {
         return \random\Random::getRandInt($min, $max, 0.5);
     }
 
-    private function getSecondOperand($firstOperand, $operator, $total)
+    private function generateSecondOperand($firstOperand, $operator, $total)
     {
         switch ($operator)
         {
@@ -121,6 +103,116 @@ class ExpressionGenerator
         }
     }
 
+    private function generateExpressionDepth($node)
+    {
+        $c = $this->config;
+        $count = sizeof($node->getElements());
+        for ($i = 0;$i < $count;$i++)
+        {
+            $current = $node->get($i);
+
+            if (is_numeric($current))
+            {
+                $innerOperands = $this->generateOperands($current);
+                $innerNode = new \model\ExpressionNode($innerOperands);
+                $node->set($i, $innerNode);
+            }
+
+            else if (is_array($current))
+            {
+                $innerOperands = $this->generateExpressionDepth($current);
+                $innerNode = new \model\ExpressionNode($innerOperands);
+                $node->set($i, $innerNode);             
+            } else {
+                \printer\Printer::print_ln("WHAT THE FUCK");
+                var_dump($current);
+            }
+        }
+        return $innerNode;
+    }
+
+    private function goToNextBranch($currentDepthLevel = 0)
+    {
+        $c = $this->config;
+        if ($currentDepthLevel < $c->maxGenerateDepth)
+        {
+            return true;
+        }
+        return false; //$this->rand_bool();
+        
+    }
+
+    private function rand_bool()
+    {
+        return (bool)random_int(0, 1);
+    }
+
+    
+    /**
+     * Generate combination of two numbers and arithmetic operation that equals to result
+     * Example: Input result is 8
+     *          output is [4, "*", 2]
+     * 
+     * @param number $result - expected result
+     * @return array - elements of arithmetic expression
+     */
+    private function generateOperands($result)
+    {
+        $c = $this->config;
+        
+        \printer\Printer::print_ln("====================");
+        
+        $operands = [];
+        $min = $result * $c->minOperandRange;
+        $max = $result * $c->maxOperandRange;
+        
+        $operator = $this->getRandomOperator();
+        // if result is 0, dont allow operator to be / or *
+        if ($result == 0) {
+            while ($this->isDivMult($operator)) {
+                $operator = $this->getRandomOperator();
+            }
+        }
+        
+        $firstOperand = $this->generateFirstOperand($min, $max);
+        // if operand is / or *, dont allow operand to be 0
+        while ($this->isDivMult($operator) && $firstOperand == 0) {
+            $firstOperand = $this->generateFirstOperand($min, $max);
+        }
+        
+        \printer\Printer::print_ln("$firstOperand $operator");
+        
+        $secondOperand = $this->generateSecondOperand($firstOperand, $operator, $result);
+        // if operand is / or *, dont allow operand to be 0
+        while ($this->isDivMult($operator) && $secondOperand == 0) {
+            $secondOperand = $this->generateSecondOperand($firstOperand, $operator, $result);
+        }
+        
+        \printer\Printer::print_ln("$firstOperand $operator $secondOperand");
+        
+        // Round operands if decimal
+        if (\util\Util::isDecimal($firstOperand)) {
+           \printer\Printer::print_ln("round 1");
+            $firstOperand = round($firstOperand, $c->roundDecimalPrecision);
+        }
+        if (\util\Util::isDecimal($secondOperand)) {
+            \printer\Printer::print_ln("round 2");
+            $secondOperand = round($secondOperand, $c->roundDecimalPrecision);
+        }
+
+        \printer\Printer::print_ln("$firstOperand $operator $secondOperand");
+        
+        $operands[] = $firstOperand;
+        $operands[] = $operator;
+        $operands[] = $secondOperand;
+        
+        \printer\Printer::print_ln(">>>> Gotovi operandi");   
+
+        return $operands;
+    }
+
+
+
     private function calculate($firstOperand, $operator, $secondOperand)
     {
         switch ($operator)
@@ -134,15 +226,6 @@ class ExpressionGenerator
             case '/':
                 return $firstOperand / $secondOperand;
         }
-    }
-
-    public function getRandomOperator()
-    {
-        return $this
-            ->config
-            ->availableOperators[rand(0, sizeof($this
-            ->config
-            ->availableOperators) - 1) ];
     }
 
     private function getOppositeOperator($operator)
@@ -163,20 +246,9 @@ class ExpressionGenerator
             break;
         }
     }
-
-    public function getDivisiblesOfNumber($number)
-    {
-        $divisibles = array();
-
-        for ($i = 1;$i <= $number;$i++)
-        {
-            if (($number % $i) === 0)
-            {
-                $divisibles[] = $i;
-            }
-        }
-
-        return $divisibles;
+    
+    public function isDivMult($element) {
+        return in_array($element, array("*", "/"));
     }
 }
 

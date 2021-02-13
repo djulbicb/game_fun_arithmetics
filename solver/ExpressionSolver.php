@@ -1,252 +1,315 @@
 <?php
-
+// $expression = "(20 + 30 * 5 / 4 + 10 * 5 / 2 - 4 + 3 - 2 /10 * 3 + 5 - 10 * 1 / 5 + 10 + 44 + 2 - 5 - 10 * -10  / -5 * -1)";
+// $expression = "((10+20)*40+50/2 + (10+20 + (440+2550)))*(10+50)*(5+7)-10";
+//$expression = "((10+20)*40+50/2 + (10+20 + (440+2550)))*(10+50)*(5+7)-10";
+//$expression = "((10+20)*40+50/2 + -(10+20 + (440+2550)))*(10+50)*(5+7)-10 / -5 / (20 + 30 * 5 / 4 + 10 * 5 / 2 - 4 + 3 - 2 /10 * 3 + 5 - 10 * 1 / 5 + 10 + 44 + 2 - 5 - 10 * -10  / -5 * -1)";
 namespace solver;
 
-define('__ROOT__', dirname(dirname(__FILE__))); 
+define('__ROOT__', dirname(dirname(__FILE__)));
 require_once __ROOT__ . '/model/ExpressionSection.php';
 require_once __ROOT__ . '/util/Util.php';
 
+/**
+ * Class for solving an arithmetic expression represented as a String.
+ */
 class ExpressionSolver
 {
-	// Solves an arithmetic arexpression.
-	// $expressionStr : string - example: ((10+20)*40+50/2)
-	public function solve ($expressionStr) {
-            // $expression = "(20 + 30 * 5 / 4 + 10 * 5 / 2 - 4 + 3 - 2 /10 * 3 + 5 - 10 * 1 / 5 + 10 + 44 + 2 - 5 - 10 * -10  / -5 * -1)";
-            // $expression = "((10+20)*40+50/2 + (10+20 + (440+2550)))*(10+50)*(5+7)-10";
-            //$expression = "((10+20)*40+50/2 + (10+20 + (440+2550)))*(10+50)*(5+7)-10";
-            //$expression = "((10+20)*40+50/2 + -(10+20 + (440+2550)))*(10+50)*(5+7)-10 / -5 / (20 + 30 * 5 / 4 + 10 * 5 / 2 - 4 + 3 - 2 /10 * 3 + 5 - 10 * 1 / 5 + 10 + 44 + 2 - 5 - 10 * -10  / -5 * -1)";
-            
-            $expression = $expressionStr;
-            \printer\Printer::print_ln($expression);
-            $expression = str_replace(" ", "", $expression);
-            $expression = str_replace("\t", "", $expression);
+    /**
+     * Solves an arithmetic expression represented as a String.
+     * Example: 3-(-51)+(-3)-9+(-23)-(-5)+21-10+(-3)-2
+     * Output:  30
+     *
+     *
+     * @param ExpressionConfig $config  - configures solver.
+     * @param String $expressionStr     - expression to solve
+     * @return Number                   - result
+     */
+    public function solve($config, $expressionStr)
+    {
+        $expression = $expressionStr;
 
-            \printer\Printer::print_ln($expression);
+        // Removes whitespace from expression
+        $expression = str_replace(" ", "", $expression);
+        $expression = str_replace("\t", "", $expression);
 
-            
-             $expressionSection =  $this->getInner($expression, "(", ")", 0);
+        \printer\Printer::print_ln($expression);
 
-           
-            while(strpos($expression, "(") !== false) {
-                    \printer\Printer::print_ln("------------------");
-                    $expressionSection =  $this->getInner($expression, "(", ")", 0);
-                    $prepared = $this->prepare_for_calculate($expressionSection->section);
-
-                    \printer\Printer::print_to_index_table($prepared);
-                    $total = $this->calculate_numbers($prepared);	
-
-                    \printer\Printer::print_ln($total);
-                    $section = $expressionSection->section;
-                    $expression = str_replace($section, $total, $expression);
-                    \printer\Printer::print_ln($expression);
-                    \printer\Printer::print_ln($total);
+        $currentSolveAttempt = 0;
+        while (strpos($expression, "(") !== false)
+        {
+            // Prevent solving code from going into infinite loop
+            if ($currentSolveAttempt > $config->maxSolveAttempts)
+            {
+                return null;
+                break;
             }
+            $currentSolveAttempt++;
 
-            $lastCalc = $this->prepare_for_calculate($expression);
-            $totalFinal = $this->calculate_numbers($lastCalc);
-            \printer\Printer::print_ln($totalFinal);
+            //  Get most inner paranthesis enclosed substring
+            $expressionSection = $this->getInner($expression, "(", ")", 0);
+            //  Transforms string into array. Prepares it for solving
+            $prepared = $this->prepare_for_calculate($expressionSection->section);
 
-            return $totalFinal;
-	}
-        
-        
-        /**
-         * Transform string expression into array of elements
-         * @param type $calc
-         * @return type
-         */
-        function prepare_for_calculate($calc) {
-	$calc = str_replace(")", "", $calc);
-	$calc = str_replace("(", "", $calc);
+            \printer\Printer::print_to_index_table($prepared);
+            $total = $this->calculate_numbers($prepared);
+            \printer\Printer::print_ln($total);
 
-	// echo $calc;
-	$segments = $this->explode_string($calc, true, "+", "-", "/", "*");
+            //  Replaces retrived substring with result
+            $section = $expressionSection->section;
+            $expression = str_replace($section, $total, $expression);
+            \printer\Printer::print_ln($expression);
+            \printer\Printer::print_ln($total);
+        }
 
-	// convert minus into negative segment
-	// example [-, 10, *, 7, -, 11] into [-10, *, 7, +, -11]
-	$oper = ["*", "/", "%"];
+        // Calculates remaining expression elements
+        $lastCalc = $this->prepare_for_calculate($expression);
+        $resukt = $this->calculate_numbers($lastCalc);
+
+        return $resukt;
+    }
+
+    /**
+     * Transform string expression into array of elements
+     * @param type $calc
+     * @return type
+     */
+    function prepare_for_calculate($calc)
+    {
+        $calc = str_replace(")", "", $calc);
+        $calc = str_replace("(", "", $calc);
+
+        // echo $calc;
+        $segments = $this->explode_string($calc, true, "+", "-", "/", "*");
+
+        // convert minus into negative segment
+        // example [-, 10, *, 7, -, 11] into [-10, *, 7, +, -11]
+        $oper = ["*", "/", "%"];
         $allOper = ["+", "-", "*", "/", "%"];
-        
+
         $insertElements = array();
         $skipNext = false;
-        for ($index = 0; $index < count($segments); $index++) {
-            if ($skipNext) {
+        for ($index = 0;$index < count($segments);$index++)
+        {
+            if ($skipNext)
+            {
                 $skipNext = false;
                 continue;
             }
-            $current= \util\Util::array_get($segments, $index);
+            $current = \util\Util::array_get($segments, $index);
             $previous = \util\Util::array_get($segments, $index - 1);
             $next = \util\Util::array_get($segments, $index + 1);
-            
+
             // number is on begining of expression
-            if ($current == "-" && is_null($previous) && is_numeric($next)) {
+            if ($current == "-" && is_null($previous) && is_numeric($next))
+            {
                 $insertElements[] = $next * -1;
                 $skipNext = true;
-            
-            } else if ($current == "-" && in_array($next, $allOper)) { 
+
+            }
+            else if ($current == "-" && in_array($next, $allOper))
+            {
                 $insertElements[] = $current;
-            } else if ($current == "-" && is_numeric($next)) { 
-                if (is_numeric($previous)) {
+            }
+            else if ($current == "-" && is_numeric($next))
+            {
+                if (is_numeric($previous))
+                {
                     $insertElements[] = "+";
                 }
                 $insertElements[] = $next * -1;
                 $skipNext = true;
-            } else {
+            }
+            else
+            {
                 $insertElements[] = $current;
             }
         }
-	return $insertElements;
-}
+        return $insertElements;
+    }
 
+    /**
+     * Calculates arithmetic expression represented as string 
+     * Example:    ["20", "+", "30", "*", "5", "/", "10" ]
+     * Output:     35
+     * 
+     * Note:    Its important that this expression doesn't have parenthesis.
+     *          Supports / * % + -
+     * @param type $segments Array of elements 
+     * @return type
+     */
+    function calculate_numbers($segments)
+    {
+        $operatorPriority = [["*", "/", "%"], ["+", "-"]];
 
+        for ($j = 0;$j < count($operatorPriority);$j++)
+        {
+            $operatorPriorityLevel = $operatorPriority[$j];
 
+            for ($i = 0;$i < count($segments);$i++)
+            {
+                $current = $segments[$i];
 
-// 	Calculates numbers inside of string
-// 	example: 
-//	20 + 30 * 5 / 4 + 10 * 5 / 2 - 4 + 3 - 2 /10 * 3 + 5 - 10 * 1 / 5 + 10 + 44 + 2 - 5 - 10 * -10  / -5 * -1 = 154.9
-// 	Its important that this expression doesnt have braces. If you have braces first use getInner() to extract segments 
-// 	Supports arithmetic functions: / * % + - 
-function calculate_numbers($segments) {
-	$operatorPriority = [ ["*", "/", "%"], ["+", "-"]];
-            
-	for ($j=0; $j < count($operatorPriority); $j++) { 
-		$operatorPriorityLevel = $operatorPriority[$j];
+                if (in_array($current, $operatorPriorityLevel))
+                {
+                    $indexOfOperator = array_search($current, $segments, true);
 
-		for ($i=0; $i < count($segments); $i++) { 
-			$current = $segments[$i];
+                    $firstOperandIndex = $indexOfOperator - 1;
+                    $secondOperandIndex = $indexOfOperator + 1;
+                    $firstOperand = floatval($segments[$firstOperandIndex]);
+                    $secondOperand = floatval($segments[$secondOperandIndex]);
 
-			if (in_array($current, $operatorPriorityLevel)) {
-				$indexOfOperator = array_search($current, $segments, true);
+                    \printer\Printer::print_ln("$firstOperand $current $secondOperand");
+                    switch ($current)
+                    {
+                        case "*":
+                            $total = $firstOperand * $secondOperand;
+                        break;
+                        case "/":
+                            $total = $firstOperand / $secondOperand;
+                            $total = number_format((float)$total, 3, '.', '');
+                        break;
+                        case "%":
+                            $total = $firstOperand % $secondOperand;
+                        break;
+                        case "+":
+                            $total = $firstOperand + $secondOperand;
+                        break;
+                        case "-":
+                            $total = $firstOperand - $secondOperand;
+                        break;
+                    }
 
-				$firstOperandIndex = $indexOfOperator - 1;
-				$secondOperandIndex = $indexOfOperator + 1;
-				$firstOperand = floatval($segments[$firstOperandIndex]);
-				$secondOperand = floatval($segments[$secondOperandIndex]);
+                    if (isset($total))
+                    {
+                        array_splice($segments, $firstOperandIndex, $secondOperandIndex - $firstOperandIndex + 1, $total);
+                        \printer\Printer::print_ln("$firstOperand $current $secondOperand = $total");
+                    }
 
+                    // reset index to check again for other occurences of that arithmetic operator
+                    $i--;
 
-				\printer\Printer::print_ln("$firstOperand $current $secondOperand");
-				switch ($current) {
-					case "*":
-						$total = $firstOperand * $secondOperand;
-						break;
-					case "/":
-						$total = $firstOperand / $secondOperand;
-						$total = number_format((float)$total, 3, '.', '');
-						break;
-					case "%":
-						$total = $firstOperand % $secondOperand;
-						break;
-					case "+":
-						$total = $firstOperand + $secondOperand;
-						break;
-					case "-":
-						$total = $firstOperand - $secondOperand;
-						break;
-				}
+                    \printer\Printer::print_to_index_table($segments);
+                }
+            }
+        }
 
-				if (isset($total)) {
-					array_splice($segments, $firstOperandIndex, $secondOperandIndex - $firstOperandIndex + 1, $total);
-					\printer\Printer::print_ln("$firstOperand $current $secondOperand = $total");
-				}
+        return $segments[0];
 
-				// reset index to check again for other occurences of that arithmetic operator
-				$i--;
+    }
 
-				\printer\Printer::print_to_index_table($segments);	
-		}
-	}
-}
+    /**
+     * Splits string based on delimiter. Supports splitting based on multiple delimiters
+     * 
+     * @param type $content                 -   Split this string
+     * @param type $keepDelimiter           -   Includes delimiters into output array
+     * @param ...strings    $delimiters     -   Split string based on these strings
+     * @return Array                        -   array of split elements
+     */
+    function explode_string($content, $keepDelimiter = false, ...$delimiters)
+    {
+        $length = strlen($content);
 
+        $segment = "";
+        $segments = [];
+        for ($i = 0;$i < $length;$i++)
+        {
+            $current = $content[$i];
 
-return $segments[0];
+            if (!in_array($current, $delimiters))
+            {
 
-}
+                $segment .= $current;
+            }
+            else
+            {
+                if ($segment !== "")
+                {
+                    $segments[] = $segment;
+                }
 
+                $segment = "";
 
-function explode_string ($content, $keepDelimiter = false, ...$delimiters) {
-	$length = strlen($content);
+                if ($keepDelimiter)
+                {
+                    $segments[] = $current;
+                }
+            }
+        }
 
-	$segment = "";
-	$segments = [];
-	for ($i=0; $i < $length; $i++) { 
-		$current = $content[$i];
+        $segments[] = $segment; // last segment
+        array_filter($segments);
+        return $segments;
+    }
 
-		if (!in_array($current, $delimiters)) {
+    /**
+     * Retrieves a substring of string. Substring is enclosed within $startChar and $endChar
+     * Function supports retrieving nested enclosed substring.
+     * 
+     * @param type $expression          -   Input string
+     * @param type $startChar           -   Enclosing start
+     * @param type $endChar             -   Enclosing end
+     * @param type $skipOccurence       -   0...n Specifies how deep to search for nested substring before returning. 0 is deepest
+     * @return \model\ExpressionSection -   DTO object of substring
+     */
+    function getInner($expression, $startChar, $endChar, $skipOccurence = 0)
+    {
+        $length = strlen($expression);
 
-			$segment .= $current;
-		} else  {
-			if ($segment !== "") {
-				$segments[] = $segment;
-			}
-			
-			$segment = "";
+        $startIndex = [];
+        $endIndex = [];
 
-			if ($keepDelimiter) {
-				$segments[] = $current;
-			}
-		}
-	}
+        // Every time endChar is found both vars are incremented
+        // but every time these two values are equal current count will be reset
+        $totalFoundOccurence = 0;
+        $currentFoundOccurence = 0;
 
-	$segments[] = $segment; // last segment
+        for ($i = 0;$i < $length;$i++)
+        {
+            $current = $expression[$i];
 
-	array_filter($segments);
-	return $segments;	
-}
+            if ($current === $startChar)
+            {
+                $startIndex[] = $i;
+            }
 
+            if ($current === $endChar)
+            {
+                $endIndex[] = $i;
+                $totalFoundOccurence++;
+                $currentFoundOccurence++;
 
-function getInner($expression, $startChar, $endChar, $skipOccurence=0) {
-	$length = strlen($expression);
+                if ($totalFoundOccurence === $skipOccurence + 1)
+                {
+                    break;
+                }
+                else
+                {
+                    // reset indexes if all inner segments are closed
+                    // because character occurence is encapsulated
+                    if (count($startIndex) === count($endIndex))
+                    {
+                        $startIndex = array_splice($startIndex, $currentFoundOccurence);
+                        $endIndex = array_splice($endIndex, $currentFoundOccurence);
 
-	$startIndex = [];
-	$endIndex = [];
+                        $currentFoundOccurence = 0;
+                    }
+                }
+            }
+        }
 
-	// Every time endChar is found both vars are incremented
-	// but every time these two values are equalle current count will be reset
-	$totalFoundOccurence = 0;
-	$currentFoundOccurence = 0;
+        if (!empty($endIndex))
+        {
+            $startOffset = end($startIndex);
+            $substrLength = end($endIndex) - end($startIndex) + 1;
 
-	for ($i=0; $i < $length; $i++) { 
-		$current = $expression[$i];
-
-		if ($current === $startChar) {
-			\printer\Printer::print_ln("_change start_{$i}_");
-			$startIndex[] = $i;
-		}
-
-		if ($current === $endChar) {
-			\printer\Printer::print_ln("_change end_{$i}_");
-			$endIndex[] = $i;
-			$totalFoundOccurence++;
-			$currentFoundOccurence++;
-
-			if ($totalFoundOccurence === $skipOccurence+1) {
-				break;	
-			} else {
-				// reset indexes if all inner segments are closed
-				// because character occurence is encapsulated
-				if (count($startIndex) === count($endIndex)) {
-					\printer\Printer::print_ln($startIndex);
-					\printer\Printer::print_ln($endIndex);
-					\printer\Printer::print_ln($currentFoundOccurence);
-					$startIndex = array_splice($startIndex, $currentFoundOccurence);
-					$endIndex = array_splice($endIndex, $currentFoundOccurence);
-
-					$currentFoundOccurence = 0;
-				}	
-			}
-		}
-	}
-
-	if (!empty($endIndex)) {
-		$startOffset = end($startIndex);
-		$substrLength = end($endIndex) - end($startIndex) + 1;
-
-		$substring = substr($expression, $startOffset, $substrLength);
-		$out = new \model\ExpressionSection($substring, $startOffset, $substrLength);
-		return $out;
-	} else {
-		return "";
-	}
+            $substring = substr($expression, $startOffset, $substrLength);
+            $out = new \model\ExpressionSection($substring, $startOffset, $substrLength);
+            return $out;
+        }
+        else
+        {
+            return "";
+        }
     }
 }
 

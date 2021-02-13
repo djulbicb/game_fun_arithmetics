@@ -20,8 +20,8 @@
     </head>
     <body>
         <?php
-
-        $config = config\ExpressionConfig::level_1();
+ \printer\Printer::print_ln("**************************************NOVO");
+        $config = config\ExpressionConfig::level_2();
         $creator = new \generator\ExpressionGenerator($config);
         $formatter = new formatter\ExpressionFormatter();
         
@@ -29,12 +29,13 @@
         $output = $formatter->format($node);
         \printer\Printer::print_ln("$output");
 
-        //  $config->maxNumOfOperands
-        for ($index = 0; $index < $config->maxNumOfOperands * 4; $index++) {
+        for ($index = 0; $index < $config->maxGenerateDepth * 2; $index++) {
+            \printer\Printer::print_ln("___POCINJE COLLAPSE");
             $node = $formatter->collapse($node);
             
             $output = $formatter->format($node);
             \printer\Printer::print_ln("$output");
+            \printer\Printer::print_ln("___ZAVRSAVA COLLAPSE");
         }
        
         $format = $formatter->format($node);
@@ -49,9 +50,12 @@
 //          
 //          $output = "5*-10+-10/12-4-(-9+2-(-10/12-5+0+1--1*-1))";
 //          printer\Printer::print_to_index_table($output);
-        $solver = new \solver\ExpressionSolver();
-        $result = $solver->solve($output);
-        \printer\Printer::print_ln($result );
+        
+        
+        
+//        $solver = new \solver\ExpressionSolver();
+//        $result = $solver->solve($config, $output);
+//        \printer\Printer::print_ln($result );
         ?>
     </body>
 </html>
