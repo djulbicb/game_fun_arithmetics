@@ -66,6 +66,22 @@ class ExpressionFormatter {
         return "({$content})";
     }
 
+    public function round_decimal_numbers_in_string($expressionStr) {
+        $output= array();
+        
+        $segments = \util\Util::explode_string($expressionStr, true, "+", "-", "/", "*", "(", ")");
+        foreach ($segments as $segment) {   
+            if (is_numeric($segment) && \util\Util::isDecimal(floatval($segment))) {
+                $roundedSegment= round($segment, 2);
+                $output[] = $roundedSegment;
+            } else {
+                $output[] = $segment;
+            }
+        }
+        return implode("", $output);
+    }
+
+
     public function collapse(&$node) {
         $collapsed = array();
         $skipNextChild = false;
@@ -100,7 +116,8 @@ class ExpressionFormatter {
                     for ($y = 0; $y < count($current->getElements()); $y++) {
                         $collapsed[] = $current->get($y);
                     }
-                } else if ($this->isMinDivMult($prev)) {
+                    $skipAllNext=true;
+                } else if ($this->isMinDivMult($prev) || $this->isDivMult($next)) {
 
                     $new = $this->collapse($current);
                     //var_export($new->getElements());
@@ -127,11 +144,7 @@ class ExpressionFormatter {
                     $collapsed[] = $current;
             }
             
-            else {
-                
-//1-() // fix these
-//1-()
-                
+            else {                
                 if ( $current == 0 && $this->isMinusPlus($prev) && $this->isMinusPlus($next)) {
                     if ($this->isMinusPlus($prev)) {
                         array_pop($collapsed);
@@ -148,35 +161,24 @@ class ExpressionFormatter {
                     $skipAllNext=true;
                     // 17-7-(-1-(-9)+(-3)+(-1)-(+(-1)))
                 }
-                
+               else if ($current == 0 && is_null($next) && $this->isMinusPlus($prev)) {
+                    array_pop($collapsed);
+                    $skipNextChild = true;
+                    $skipAllNext=true;
+                }
                 else if ($current == 0 && is_null($next)) {
                     // get rid of 0 at end
                     // 12-4+(-2)-(-7)+(0)+(-1)+(0)+(-1)+(0)+(0)
                     if ($this->isMinusPlus($prev)) {
                         array_pop($collapsed);
+                        $skipNextChild = true;
                         $skipAllNext=true;
                     }
-                }
-                
-                else if ($current == 0 && is_null($next) && $this->isMinusPlus($prev)) {
-                                           array_pop($collapsed);
-                    $skipNextChild = true;
-                    $skipAllNext=true;
-                }
-//                    
-//                } else if (is_null($prev) && $this->isPlus($current) && is_object($next)) {
-//                    // 17-7-(-1-(-9)+(-3)+(-1)-(+(-1)))
-//                } else if ($current == 0 && is_null($prev) + $this->isMinusPlus($next)) {
-//                    if ($this->isPlus($next)) {
-//                        // skip -(0+2))' 
-//                    }
-//                }              
+                }           
 
                 else {
                     $collapsed[] = $current;
                 } 
-                
-//                $collapsed[] = $current;
             }
         }
 
@@ -228,5 +230,9 @@ class ExpressionFormatter {
         } else {
             return false;
         }
+    }
+    
+    public function isDivMult($element) {
+        return in_array($element, array("*", "/"));
     }
 }

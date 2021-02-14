@@ -41,7 +41,7 @@
         $format = $formatter->format($node);
         \printer\Printer::print_ln($format);
         
-        var_dump($format);
+        $rounded = $formatter->round_decimal_numbers_in_string($format);
   
         
         
@@ -53,9 +53,11 @@
         
         
         
-//        $solver = new \solver\ExpressionSolver();
-//        $result = $solver->solve($config, $output);
-//        \printer\Printer::print_ln($result );
+        $solver = new \solver\ExpressionSolver();
+        $result = $solver->solve($config, $output);
+        \printer\Printer::print_ln($result);
+        \printer\Printer::print_ln($format);
+        \printer\Printer::print_ln($rounded);
         ?>
     </body>
 </html>

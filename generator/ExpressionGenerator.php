@@ -19,6 +19,9 @@ class ExpressionGenerator
         $result = $this->generateResult();
         \printer\Printer::print_ln($result);
 
+        $formatter = new \formatter\ExpressionFormatter();
+
+        
         $operands = $this->generateOperands($result);
         $resultNode = new \model\ExpressionNode($operands);
         
@@ -26,7 +29,8 @@ class ExpressionGenerator
         $currentGenerateDepth = 0;
         while ($currentGenerateDepth < $c->maxGenerateDepth)
         {
-         
+            $output = $formatter->format($resultNode);
+            \printer\Printer::print_ln("Formatted: $output");
             
             \printer\Printer::print_ln(">>>> Pocinje grana");
             $currentGenerateDepth++;
@@ -113,19 +117,23 @@ class ExpressionGenerator
 
             if (is_numeric($current))
             {
+                \printer\Printer::print_ln("Numeric");
                 $innerOperands = $this->generateOperands($current);
                 $innerNode = new \model\ExpressionNode($innerOperands);
                 $node->set($i, $innerNode);
+                \printer\Printer::print_ln("Numeric done");
             }
 
             else if (is_array($current))
             {
+                \printer\Printer::print_ln("Array");
                 $innerOperands = $this->generateExpressionDepth($current);
                 $innerNode = new \model\ExpressionNode($innerOperands);
                 $node->set($i, $innerNode);             
+                \printer\Printer::print_ln("Array done");
             } else {
                 \printer\Printer::print_ln("WHAT THE FUCK");
-                var_dump($current);
+//                var_dump($current);
             }
         }
         return $innerNode;
@@ -163,42 +171,50 @@ class ExpressionGenerator
         \printer\Printer::print_ln("====================");
         
         $operands = [];
-        $min = $result * $c->minOperandRange;
-        $max = $result * $c->maxOperandRange;
+        $min = $c->minTotal * $c->minOperandRange;
+        $max = $c->maxTotal* $c->maxOperandRange;
         
         $operator = $this->getRandomOperator();
+        \printer\Printer::print_ln("operator 1: $operator");
         // if result is 0, dont allow operator to be / or *
         if ($result == 0) {
             while ($this->isDivMult($operator)) {
+                \printer\Printer::print_ln("operand 2 + $operator");
                 $operator = $this->getRandomOperator();
             }
         }
+        \printer\Printer::print_ln("operator 2: $operator");
         
         $firstOperand = $this->generateFirstOperand($min, $max);
+        \printer\Printer::print_ln("operand 1 start: $firstOperand");
         // if operand is / or *, dont allow operand to be 0
         while ($this->isDivMult($operator) && $firstOperand == 0) {
+            \printer\Printer::print_ln("operand 1 + $firstOperand");
             $firstOperand = $this->generateFirstOperand($min, $max);
         }
         
+        \printer\Printer::print_ln("operand 1 end: $firstOperand");
         \printer\Printer::print_ln("$firstOperand $operator");
         
         $secondOperand = $this->generateSecondOperand($firstOperand, $operator, $result);
+        \printer\Printer::print_ln("operand 2 start: $secondOperand");
         // if operand is / or *, dont allow operand to be 0
         while ($this->isDivMult($operator) && $secondOperand == 0) {
+            \printer\Printer::print_ln("operand 2 + $secondOperand");
             $secondOperand = $this->generateSecondOperand($firstOperand, $operator, $result);
         }
-        
+        \printer\Printer::print_ln("operand 2 end: $secondOperand");
         \printer\Printer::print_ln("$firstOperand $operator $secondOperand");
         
         // Round operands if decimal
-        if (\util\Util::isDecimal($firstOperand)) {
-           \printer\Printer::print_ln("round 1");
-            $firstOperand = round($firstOperand, $c->roundDecimalPrecision);
-        }
-        if (\util\Util::isDecimal($secondOperand)) {
-            \printer\Printer::print_ln("round 2");
-            $secondOperand = round($secondOperand, $c->roundDecimalPrecision);
-        }
+//        if (\util\Util::isDecimal($firstOperand)) {
+//           \printer\Printer::print_ln("round 1");
+//            $firstOperand = round($firstOperand, $c->roundDecimalPrecision);
+//        }
+//        if (\util\Util::isDecimal($secondOperand)) {
+//            \printer\Printer::print_ln("round 2");
+//            $secondOperand = round($secondOperand, $c->roundDecimalPrecision);
+//        }
 
         \printer\Printer::print_ln("$firstOperand $operator $secondOperand");
         

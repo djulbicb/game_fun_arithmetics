@@ -79,7 +79,7 @@ class ExpressionSolver
         $calc = str_replace("(", "", $calc);
 
         // echo $calc;
-        $segments = $this->explode_string($calc, true, "+", "-", "/", "*");
+        $segments = \util\Util::explode_string($calc, true, "+", "-", "/", "*");
 
         // convert minus into negative segment
         // example [-, 10, *, 7, -, 11] into [-10, *, 7, +, -11]
@@ -162,21 +162,20 @@ class ExpressionSolver
                     switch ($current)
                     {
                         case "*":
-                            $total = $firstOperand * $secondOperand;
-                        break;
+                            $total = bcmul($firstOperand, $secondOperand, 6);
+                            break;
                         case "/":
-                            $total = $firstOperand / $secondOperand;
-                            $total = number_format((float)$total, 3, '.', '');
-                        break;
+                            $total = bcdiv($firstOperand, $secondOperand, 6);
+                            break;
                         case "%":
-                            $total = $firstOperand % $secondOperand;
-                        break;
+                            $total = bcmod($firstOperand, $secondOperand, 6);
+                            break;
                         case "+":
-                            $total = $firstOperand + $secondOperand;
-                        break;
+                            $total = bcadd($firstOperand, $secondOperand, 6);
+                            break;
                         case "-":
-                            $total = $firstOperand - $secondOperand;
-                        break;
+                            $total = bcsub($firstOperand, $secondOperand, 6);
+                            break;
                     }
 
                     if (isset($total))
@@ -195,50 +194,6 @@ class ExpressionSolver
 
         return $segments[0];
 
-    }
-
-    /**
-     * Splits string based on delimiter. Supports splitting based on multiple delimiters
-     * 
-     * @param type $content                 -   Split this string
-     * @param type $keepDelimiter           -   Includes delimiters into output array
-     * @param ...strings    $delimiters     -   Split string based on these strings
-     * @return Array                        -   array of split elements
-     */
-    function explode_string($content, $keepDelimiter = false, ...$delimiters)
-    {
-        $length = strlen($content);
-
-        $segment = "";
-        $segments = [];
-        for ($i = 0;$i < $length;$i++)
-        {
-            $current = $content[$i];
-
-            if (!in_array($current, $delimiters))
-            {
-
-                $segment .= $current;
-            }
-            else
-            {
-                if ($segment !== "")
-                {
-                    $segments[] = $segment;
-                }
-
-                $segment = "";
-
-                if ($keepDelimiter)
-                {
-                    $segments[] = $current;
-                }
-            }
-        }
-
-        $segments[] = $segment; // last segment
-        array_filter($segments);
-        return $segments;
     }
 
     /**
