@@ -20,7 +20,7 @@ class Printer
     public static function print_tag($tag, $content)
     {
 
-        echo Printer::sprint_tag($tag, $content);
+        //echo Printer::sprint_tag($tag, $content);
     }
 
     public static function sprint_tag($tag, $content)
@@ -69,7 +69,7 @@ class Printer
     }
 
     public static function print_to_index_table($content) {
-        echo Printer::sprint_to_index_table($content);
+        //echo Printer::sprint_to_index_table($content);
     }
 }
 

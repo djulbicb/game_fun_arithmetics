@@ -1,0 +1,222 @@
+
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./static/fonts/Rudiment/Rudiment.ttf'); /* IE9 Compat Modes */
+  src: local('/Rudiment'), local('/Rudiment'),
+       url('./static/fonts/Rudiment/Rudiment.ttf') format('ttf'), /* IE6-IE8 */
+}
+
+* {
+  /* border: 1px solid gray; */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Rudiment;
+  color: white;
+}
+
+.Game {
+  background-color: black;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+}
+
+.Container {
+  width: 100%;
+  height: 100%;
+  background-image: url(./static/img/concrete_background.jpg);
+  background-repeat: repeat-x repeat-y;
+}
+
+/* FRAME AND BOARD */
+.Board {
+  background-image: url(./static/img/board.jpg);
+  height: 100%;
+  width: 100%;
+  background-repeat: repeat-x;
+}
+
+.Frame {
+  position: relative;
+  height: 80%;
+  width: 90%;
+  /* border: 5px solid gray; */
+  overflow: hidden;
+  box-shadow: 10px 10px 30px black;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.frame {
+  z-index:10;
+}
+
+.frameLT {
+  position: absolute;
+  left: 0;
+}
+.frameRT {
+  position: absolute;
+  right: 0;
+}
+.frameLB {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+.frameRB {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+.frameL {
+  position: absolute;
+  left: 0;
+  -webkit-filter: drop-shadow(5px 5px 5px #222);
+  filter: drop-shadow(5px 5px 5px #222)
+}
+.frameR {
+  position: absolute;
+  right: 0;
+}
+.frameT {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.frameB {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+
+/* UI ELEMENTS */
+.UI {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+
+/* TITLE */
+.title {
+  font-size: 10em;
+  color: #ffffff;
+}
+
+.underline {
+  background-image: url(./static/img/underline.png);
+  background-size:100% 100%;
+  height: 4em;
+  width: 70%;
+  margin: auto;
+  margin-bottom: 5em;
+}
+
+/* BUTTONS */
+.buttons {
+  width: 80%;
+  margin: auto;
+}
+
+.button {
+  float: left;
+  font-size: 4em;
+  padding: 0.5em;
+  width: 20%;
+  background-image: url(./static/img/button_outline.png);
+  background-size:100% 100%;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+.button:hover {
+  color: #f1c40fed;
+  background-image: url(./static/img/button_outline_hover.png);
+}
+
+
+.expression {
+  font-size: 5em;
+  letter-spacing: 4px;
+}
+
+.page1 {
+  background-color: rgba(0, 0, 255, 0.145);
+    margin:0;
+    padding:0;
+    z-index:8;
+    top:0;
+    left:0; 
+    height:100%;  
+    width:100%;
+    position:fixed;
+}
+
+.page2 {
+  background-color: rgba(255, 0, 0, 0.104);
+  margin:0;
+  padding:0;
+  z-index:8;
+  top:0;
+  left:-100%; 
+  position:fixed;
+  width:100%;
+  height:100%;  
+}
+
+.wrapper {
+  overflow: visible;
+  clear: both;
+  top: 50%;
+  position: absolute;
+  left: 50%;
+  width:100%;
+  transform: translate(-50%, -50%);
+}
+
+.slidIn {
+  left: 0;
+}
+
+.slideIn {
+  animation: slideIn 0.5s forwards;
+  -webkit-animation: slideIn 0.5s forwards;
+}
+
+.slideOut {
+  animation: slideOut 0.5s forwards;
+  -webkit-animation: slideOut 0.5s forwards;
+}
+
+@keyframes slideIn {
+  100% { left: 0; }
+}
+
+@-webkit-keyframes slideIn {
+  100% { left: 0; }
+}
+
+@keyframes slideOut {
+  100% { left: 100%; }
+}
+
+@-webkit-keyframes slideOut {
+  100% { left: 100%; }
+}
+
+
+.page2Visible {
+  visibility: visible;
+  opacity: 1;
+}

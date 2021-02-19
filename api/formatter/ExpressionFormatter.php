@@ -74,7 +74,7 @@ class ExpressionFormatter {
             if (is_numeric($segment) && \util\Util::isDecimal(floatval($segment))) {
                 $roundedSegment= round($segment, 2);
                 
-                if ($x == 0) {
+                if ($roundedSegment == 0) {
                     $output[] = $segment;
                 } else {
                     $output[] = $roundedSegment;
