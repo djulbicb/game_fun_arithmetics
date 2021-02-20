@@ -1,5 +1,3 @@
-
-
 @font-face {
   font-family: 'Open Sans';
   font-style: normal;
@@ -9,14 +7,49 @@
        url('./static/fonts/Rudiment/Rudiment.ttf') format('ttf'), /* IE6-IE8 */
 }
 
+/*  /////////////////////////////////////////
+//  GENERAL 
+//  ///////////////////////////////////////*/
+
 * {
   /* border: 1px solid gray; */
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Rudiment;
+  font-family: 'Rudiment', 'Comic Neue', cursive; 
   color: white;
+  /* 
+  'Annie Use Your Telescope'
+  'Amatic SC'
+  'Comic Neue'
+  'Rudiment', 'Architects Daughter' 'Amatic SC', cursive; 'Handlee' 'Neucha' 'Nanum Pen Script' 'Mali' 'Annie Use Your Telescope' 'Coming Soon' 'Nanum Brush Script'  'Comic Neue' 'Waiting for the Sunrise' 'Chilanka'*/
 }
+
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.w20 { width: 20%; }
+.w40 { width: 40%; }
+.w60 { width: 60%; }
+.w80 { width: 80%; }
+.w100 { width: 100%; }
+
+.off20 { margin-left: 20%; }
+.off40 { margin-left: 40%; }
+.off60 { margin-left: 60%; }
+.off80 { margin-left: 80%; }
+.off100 { margin-left: 100%; }
+
+.fltLeft {
+  float: left;
+}
+
+/*  /////////////////////////////////////////
+//  MAIN 
+//  ///////////////////////////////////////*/
 
 .Game {
   background-color: black;
@@ -28,11 +61,14 @@
 .Container {
   width: 100%;
   height: 100%;
-  background-image: url(./static/img/concrete_background.jpg);
   background-repeat: repeat-x repeat-y;
+  background-image: url(./static/img/concrete_background.jpg);
 }
 
-/* FRAME AND BOARD */
+/*  /////////////////////////////////////////
+//  FRAME AND BOARD 
+//  ///////////////////////////////////////*/
+
 .Board {
   background-image: url(./static/img/board.jpg);
   height: 100%;
@@ -54,50 +90,71 @@
 
 .frame {
   z-index:10;
+  position: absolute;
+}
+
+.frameLB, .frameRB, .frameLT, .frameRT, .frameT, .frameB  {
+  height: 182px;
+}
+
+.frameT, .frameB {
+  background-size: 100% 100%;
+}
+
+.frameL, .frameR {
+  width: 182px;
+  background-size: 100% 100%;
 }
 
 .frameLT {
-  position: absolute;
   left: 0;
 }
 .frameRT {
-  position: absolute;
   right: 0;
 }
 .frameLB {
-  position: absolute;
   left: 0;
   bottom: 0;
 }
 .frameRB {
-  position: absolute;
   right: 0;
   bottom: 0;
 }
 .frameL {
-  position: absolute;
+  background-image: url('./static/img/frame_L.png');
+  height: 100%;
   left: 0;
-  -webkit-filter: drop-shadow(5px 5px 5px #222);
-  filter: drop-shadow(5px 5px 5px #222)
+
+  -webkit-filter: drop-shadow(5px 3px 3px #222);
+  filter: drop-shadow(5px 3px 3px #222)
 }
 .frameR {
-  position: absolute;
+  background-image: url('./static/img/frame_R.png');
+  height: 100%;
   right: 0;
 }
 .frameT {
-  position: absolute;
+  background-image: url('./static/img/frame_T.png');
+  width: 100%;
+
   top: 0;
   left: 0;
 }
 .frameB {
-  position: absolute;
+  background-image: url('./static/img/frame_B.png');
+  width: 100%;
+
   bottom: 0;
   left: 0;
 }
 
 
-/* UI ELEMENTS */
+/*  /////////////////////////////////////////
+//  UI ELEMENTS
+//  ///////////////////////////////////////*/
+
 .UI {
+  z-index: 20;
   position: absolute;
   width: 100%;
   height: 100%;
@@ -107,33 +164,30 @@
   text-align: center;
 }
 
-
-/* TITLE */
 .title {
-  font-size: 10em;
-  color: #ffffff;
+  font-size: 11em;
 }
 
 .underline {
   background-image: url(./static/img/underline.png);
   background-size:100% 100%;
-  height: 4em;
-  width: 70%;
+  height: 2em;
+  width: 60%;
   margin: auto;
   margin-bottom: 5em;
 }
 
 /* BUTTONS */
-.buttons {
+.row {
   width: 80%;
   margin: auto;
+  clear: both;
+  margin-bottom: 0.25em;
 }
 
 .button {
-  float: left;
   font-size: 4em;
   padding: 0.5em;
-  width: 20%;
   background-image: url(./static/img/button_outline.png);
   background-size:100% 100%;
   cursor: pointer;
@@ -143,16 +197,36 @@
 .button:hover {
   color: #f1c40fed;
   background-image: url(./static/img/button_outline_hover.png);
+  transform: rotate(10);
 }
 
+#buttonSubmit, .buttonReturn {
+  padding: 0.2em;
+}
+
+.buttonReturn {
+  width: 1em;
+  height: 1em;
+  top: 1.5em;
+  right: 1.5em;
+  padding: 0em;
+  position: absolute;
+  background-image: url(./static/img/button_outline.png);
+  background-size:100% 100%;
+  cursor: pointer;
+  z-index: 9999;
+  font-size: 4em;
+  padding: 0;
+}
 
 .expression {
   font-size: 5em;
   letter-spacing: 4px;
+  margin-bottom: 0.5em;
 }
 
 .page1 {
-  background-color: rgba(0, 0, 255, 0.145);
+  /* background-color: rgba(0, 0, 255, 0.145); */
     margin:0;
     padding:0;
     z-index:8;
@@ -161,10 +235,11 @@
     height:100%;  
     width:100%;
     position:fixed;
+    opacity: 0;
 }
 
 .page2 {
-  background-color: rgba(255, 0, 0, 0.104);
+  /* background-color: rgba(255, 0, 0, 0.104); */
   margin:0;
   padding:0;
   z-index:8;
@@ -173,6 +248,11 @@
   position:fixed;
   width:100%;
   height:100%;  
+}
+
+.page2Visible {
+  visibility: visible;
+  opacity: 1;
 }
 
 .wrapper {
@@ -185,6 +265,261 @@
   transform: translate(-50%, -50%);
 }
 
+/*  Text field   */
+/*****************/
+
+.TextField {
+  vertical-align: bottom;
+}
+
+.TextField .labelWrapper, .TextField .fieldWrapper  {
+  float: left;
+  position: relative;
+  margin-bottom: 1em;
+}
+
+.TextField .underline {
+  background-image: url(./static/img/underline.png);
+  background-size: 20% 100%;
+  height: 0.5em;
+  width: 100%;
+  position: absolute;
+  margin: 0;
+  margin-bottom: 0;
+}
+
+.TextField input {
+  padding: 0.2em;
+  border-radius: 1em;
+  background: none;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  font-size: 2.5em;
+  width: 100%;
+  margin-bottom: 0.25em;
+  padding-left: 1em;
+  background-color: none;
+  transition: background-color 0.5s;
+  z-index: 9999;
+  position: relative;
+}
+
+textarea:focus, .TextField input:focus{
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.TextField .label {
+  font-size: 3.2em;
+  vertical-align: bottom;
+}
+
+.rowSubmit {
+  width: 100%;
+  position: relative;
+}
+
+.TextField .errorLabel {
+  display: inline-block;
+  margin-right: 0.5em;
+  font-size: 3em;
+  position: absolute;
+  right: 20%;
+  top: 2.25em;
+  opacity: 0;
+}
+
+.TextField #buttonSubmit {
+  display: inline-block;
+  width: 20%;
+  position: absolute;
+  right: 0;
+  top: 1.5em;
+}
+
+  /*  /////////////////////////////////////////
+  //  MEDIA QUERY
+  //  ///////////////////////////////////////*/
+
+  @media screen and (max-width: 1200px)  {
+    html {
+      /* border: 10px solid rebeccapurple; */
+    }
+
+    .frameLB, .frameRB, .frameLT, .frameRT {
+      height: 90px;
+    }
+    
+    .frameL, .frameR {
+      width: 90px;
+    }
+
+    .frameT, .frameB {
+      height: 90px;
+    }
+
+    /*  /////////////////////////////////////////
+    //  UI ELEMENTS
+    //  ///////////////////////////////////////*/
+
+    .title {
+      font-size: 5em;
+    }
+
+    .underline {
+      height: 2em;
+      width: 55%;
+    }
+
+    .button {
+      font-size: 2em;
+    }
+
+    .buttonReturn {
+      top: 0.7em;
+      right: 0.7em;
+    }
+
+    #buttonSubmit {
+      font-size: 3em;
+    }
+
+    .expression {
+      font-size: 3em;
+    }
+
+    .TextField #buttonSubmit {
+      top: 2em;
+    }
+
+    .TextField .errorLabel {
+      font-size: 2em;
+      top: 3.5em;
+    }
+  }
+
+
+  @media screen and (max-width: 600px) and (orientation: portrait)  {
+    .button {
+      width: 100%;
+      padding: 0.25em;
+    }
+
+    .title {
+      font-size: 4em;
+    }
+
+    .Frame {
+      height: 100%;
+      width: 100%;
+      /* border: 5px solid gray; */
+    }
+
+    .underline {
+      height: 0.7em;
+      width: 80%;
+      margin-bottom: 1em;
+    }
+
+    .wrapper {
+      padding: 1em;
+    }
+
+    .TextField div {
+      float: none;
+      width: 100%;
+      margin-bottom: 0;
+    }
+
+    .w20, .w80 {
+      width: 100%;
+    }
+  
+    .off20 {
+      margin-left: 0;
+    }
+
+
+    .TextField .errorLabel {
+      width: 100%;
+      position: static;
+      font-size: 2em;
+      margin-top: 0.25em;
+    }
+    
+    .TextField #buttonSubmit {
+      margin-top: 0.25em;
+      width: 100%;
+      position: static;
+    }
+  }
+
+  @media screen and (min-width: 320px) and (max-width: 767px) and (orientation: landscape) {
+    /* html {
+      border: 10px solid rebeccapurple;
+      transform: rotate(-90deg);
+      transform-origin: left top;
+      width: 100vh;
+      overflow-x: hidden;
+      position: absolute;
+      top: 100%;
+      left: 0;
+    } */
+  
+    .Frame {
+      height: 100%;
+      width: 100%;
+      /* border: 5px solid gray; */
+    }
+  
+    .underline {
+      margin-bottom: 1em;
+      height: 0.5em;
+    }
+  
+    .button {
+      font-size: 1.5em;
+    }
+  
+    .expression {
+      font-size: 2em;
+      vertical-align: bottom;
+    }
+  
+    .TextField .label {
+      font-size: 2em;
+      vertical-align: bottom;
+    }
+  
+    .title {
+      font-size: 4em;
+    }
+  
+    .buttonReturn {
+      width: 1em;
+      height: 1em;
+      font-size: 3em;
+    }
+  
+    .TextField .errorLabel {
+      font-size: 1.5em;
+      top: 3.7em;
+    }
+  
+    .TextField #buttonSubmit {
+      font-size: 2em;
+      top: 2.7em;
+    }
+  
+    .TextField .labelWrapper {
+      padding-top: 0.7em;
+    }
+  }
+
+
+/*  /////////////////////////////////////////
+//  ANIMATION
+//  ///////////////////////////////////////*/
+
 .slidIn {
   left: 0;
 }
@@ -194,29 +529,52 @@
   -webkit-animation: slideIn 0.5s forwards;
 }
 
+.fadeIn {
+  animation: fadeIn 0.5s forwards;
+  -webkit-animation: fadeIn 0.5s forwards;
+}
+
+.fadeOut {
+  animation: fadeOut 0.5s forwards;
+  -webkit-animation: fadeOut 0.5s forwards;
+}
+
+@keyframes fadeOut {
+  100% { opacity: 0; }
+}
+
+@-webkit-keyframes fadeOut {
+  100% { opacity: 0; }
+}
+
+@keyframes fadeIn {
+  100% { opacity: 1; }
+}
+
+@-webkit-keyframes fadeIn {
+  100% { opacity: 1; }
+}
+
+
 .slideOut {
   animation: slideOut 0.5s forwards;
   -webkit-animation: slideOut 0.5s forwards;
 }
 
 @keyframes slideIn {
-  100% { left: 0; }
+  100% { left: 0; opacity: 1; }
 }
 
 @-webkit-keyframes slideIn {
-  100% { left: 0; }
+  100% { left: 0; opacity: 1; }
 }
 
 @keyframes slideOut {
-  100% { left: 100%; }
+  100% { left: 100%; opacity: 0; }
 }
 
 @-webkit-keyframes slideOut {
-  100% { left: 100%; }
+  100% { left: 100%; opacity: 0; }
 }
 
 
-.page2Visible {
-  visibility: visible;
-  opacity: 1;
-}
