@@ -8,7 +8,7 @@ Practice your arithetic skills with this app. <br>
 Pick a level, solve, and type in the solution to a given expression to finish the round. <br>
 5 levels of difficulty available. <br>
 
-Backend done in PHP and fronted with React. Backend generates and solves arithmetic string expression
+Backend done in PHP and frontend with React. Backend generates and solves arithmetic string expression
 
 # Run locally
 
