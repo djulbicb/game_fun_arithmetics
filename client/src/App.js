@@ -23,10 +23,6 @@ class App extends React.Component {
     this.textField = React.createRef();  
   }
 
-  handleSolve = (e) => {    
-
-  }
-
   handleClick = (e) => {
     e.preventDefault();
     if (this.sliding) return;
@@ -44,15 +40,19 @@ class App extends React.Component {
       this.setState({
         ...this.state,
         expression: response.data
+      }, () => {
+
+        this.setState({ page2Class: 'slidIn slideOut', page1Class: "fadeIn" }, () => {
+          setTimeout(() => {
+            this.setState({ page2Class: '' }, () => {
+              this.sliding = false;
+            });
+          }, 600)
+        });
+
       })
 
-      this.setState({ page2Class: 'slidIn slideOut', page1Class: "fadeIn" }, () => {
-        setTimeout(() => {
-          this.setState({ page2Class: '' }, () => {
-            this.sliding = false;
-          });
-        }, 600)
-      });
+
     })
   };
 
