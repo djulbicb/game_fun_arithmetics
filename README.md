@@ -2,7 +2,7 @@
 
 ![board_git](https://user-images.githubusercontent.com/12097459/109383916-f2bb3400-78e9-11eb-913e-438d9f8a2493.png)
 
-Access app at http://www.bojandjulbic.com/game/game_fun_arithmetics/
+Access app at http://www.bojandjulbic.com/assets/games/game_fun_arithmetics/
 
 Practice your arithetic skills with this app. <br>
 Pick a level, solve, and type in the solution to a given expression to finish the round. <br>
